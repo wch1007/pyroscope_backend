@@ -1,17 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import json
+import logging
 from app.database import get_db
 from app.models.scan import ScanRecord
 from app.models.image import ScanImage
-from app.schemas.image import ImageUploadResponse
+from app.schemas.image import ImageUploadResponse, FuelEstimationData
 from app.services.image_service import ImageService
+from app.services.fuel_estimation_service import FuelEstimationService
 from app.utils.validators import validate_image_type
 from app.utils.file_handler import validate_image_file
 import os
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
@@ -25,9 +29,14 @@ async def upload_image(
     longitude: Optional[float] = Form(None),
     captured_at: Optional[str] = Form(None),
     metadata: Optional[str] = Form(None),
+    estimate_fuel: Optional[bool] = Form(True),  # Enable fuel estimation by default
     db: Session = Depends(get_db)
 ):
-    """Upload an image for a scan"""
+    """
+    Upload an image for a scan
+    
+    If estimate_fuel is True and image_type is 'visible', automatically estimates fuel load
+    """
     # Validate file
     validate_image_file(file)
     
@@ -81,10 +90,47 @@ async def upload_image(
     db.commit()
     db.refresh(scan_image)
     
+    # Perform fuel estimation if requested and image is visible type
+    fuel_estimation_data = None
+    if estimate_fuel and image_type == "visible":
+        try:
+            logger.info(f"Starting fuel estimation for image {scan_image.id}")
+            fuel_service = FuelEstimationService()
+            estimation_result = fuel_service.estimate_fuel_load(file_info["file_path"])
+            
+            if estimation_result.get("success"):
+                logger.info(f"Fuel estimation successful: {estimation_result}")
+                
+                # Update scan record with fuel estimation data
+                scan.fuel_load = estimation_result.get("total_fuel_load")
+                scan.one_hour_fuel = estimation_result.get("one_hour_fuel")
+                scan.ten_hour_fuel = estimation_result.get("ten_hour_fuel")
+                scan.hundred_hour_fuel = estimation_result.get("hundred_hour_fuel")
+                scan.pine_cone_count = estimation_result.get("pine_cone_count")
+                
+                db.commit()
+                db.refresh(scan)
+                
+                # Prepare fuel estimation data for response
+                fuel_estimation_data = FuelEstimationData(
+                    total_fuel_load=estimation_result.get("total_fuel_load"),
+                    one_hour_fuel=estimation_result.get("one_hour_fuel"),
+                    ten_hour_fuel=estimation_result.get("ten_hour_fuel"),
+                    hundred_hour_fuel=estimation_result.get("hundred_hour_fuel"),
+                    pine_cone_count=estimation_result.get("pine_cone_count")
+                )
+            else:
+                logger.warning(f"Fuel estimation failed: {estimation_result.get('error')}")
+        
+        except Exception as e:
+            # Log the error but don't fail the image upload
+            logger.error(f"Error during fuel estimation: {str(e)}", exc_info=True)
+    
     return ImageUploadResponse(
         image_id=scan_image.id,
         file_path=file_info["file_path"],
-        url=f"/api/images/{scan_image.id}"
+        url=f"/api/images/{scan_image.id}",
+        fuel_estimation=fuel_estimation_data
     )
 
 

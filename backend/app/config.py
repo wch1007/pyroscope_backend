@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     # CORS Configuration
     CORS_ORIGINS: str = '["http://localhost:5173"]'
     
+    # Fuel Estimation API Configuration
+    FUEL_ESTIMATION_API_URL: str = "https://fe.wildlands.ai/"
+    FUEL_ESTIMATION_TIMEOUT: int = 60  # 60 seconds timeout
+    FUEL_ESTIMATION_HEADLESS: bool = True  # Run browser in headless mode
+    
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS from JSON string to list"""

@@ -57,11 +57,20 @@ class ApiClient {
   }
 
   // Image Upload
-  async uploadImage(scanId, file, metadata) {
+  /**
+   * Upload an image for a scan
+   * @param {number} scanId - The scan record ID
+   * @param {File} file - The image file to upload
+   * @param {Object} metadata - Additional metadata
+   * @param {boolean} estimateFuel - Whether to estimate fuel load (default: true)
+   * @returns {Promise<Object>} Response with image_id, url, and fuel_estimation data
+   */
+  async uploadImage(scanId, file, metadata, estimateFuel = true) {
     const formData = new FormData();
     formData.append('scan_id', scanId);
     formData.append('image_type', metadata.image_type || 'visible');
     formData.append('file', file);
+    formData.append('estimate_fuel', estimateFuel);
     
     if (metadata.latitude) formData.append('latitude', metadata.latitude);
     if (metadata.longitude) formData.append('longitude', metadata.longitude);
@@ -78,7 +87,10 @@ class ApiClient {
       throw new Error(errorData.detail || 'Image upload failed');
     }
 
-    return response.json();
+    const result = await response.json();
+    // Result includes: image_id, file_path, url, message, and fuel_estimation (if available)
+    // fuel_estimation: { total_fuel_load, one_hour_fuel, ten_hour_fuel, hundred_hour_fuel, pine_cone_count }
+    return result;
   }
 
   getImageUrl(imageId) {

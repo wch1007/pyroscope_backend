@@ -177,6 +177,20 @@
   font-weight: 600;
 }
 
+.results-value.fuel-total {
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Highlighted Row */
+.results-row.highlight {
+  background: rgba(34, 197, 94, 0.08);
+  padding: 8px;
+  border-radius: 6px;
+  margin: -4px -4px 4px -4px;
+}
+
 /* Recommendations */
 .results-card.recommendations {
   background: rgba(239, 68, 68, 0.05);

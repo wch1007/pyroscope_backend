@@ -27,9 +27,14 @@ class ScanRecord(Base):
     avg_humidity = Column(DECIMAL(5, 2), nullable=True)
     wind_speed = Column(DECIMAL(5, 2), nullable=True)
     temp_diff = Column(DECIMAL(5, 2), nullable=True)
-    fuel_load = Column(String(20), nullable=True)
+    fuel_load = Column(DECIMAL(10, 4), nullable=True)  # Total fuel load in tons/acre
     fuel_density = Column(DECIMAL(5, 2), nullable=True)
     biomass = Column(DECIMAL(5, 2), nullable=True)
+    # Detailed fuel estimation fields
+    one_hour_fuel = Column(DECIMAL(10, 4), nullable=True)  # tons/acre
+    ten_hour_fuel = Column(DECIMAL(10, 4), nullable=True)  # tons/acre
+    hundred_hour_fuel = Column(DECIMAL(10, 4), nullable=True)  # tons/acre
+    pine_cone_count = Column(Integer, nullable=True)
     robot_id = Column(String(50), nullable=True)
     completed_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())

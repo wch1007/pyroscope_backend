@@ -85,20 +85,78 @@ function ScanResults({ scanData, onBack }) {
               Fuel Estimation
             </h3>
             <div className="results-card">
-              <div className="results-row">
-                <span className="results-label">Estimated Fuel Load:</span>
-                <span className={`results-value fuel-${scanData.fuelLoad.toLowerCase()}`}>
-                  {scanData.fuelLoad}
-                </span>
-              </div>
-              <div className="results-row">
-                <span className="results-label">Fuel Density Index:</span>
-                <span className="results-value">{scanData.fuelDensity}</span>
-              </div>
-              <div className="results-row">
-                <span className="results-label">Estimated Biomass:</span>
-                <span className="results-value">{scanData.biomass} kg / m²</span>
-              </div>
+              {/* Total Fuel Load */}
+              {scanData.fuel_load !== undefined && scanData.fuel_load !== null && (
+                <div className="results-row highlight">
+                  <span className="results-label">Total Fuel Load:</span>
+                  <span className="results-value fuel-total">
+                    {scanData.fuel_load.toFixed(3)} tons/acre
+                  </span>
+                </div>
+              )}
+              
+              {/* Detailed Fuel Breakdown */}
+              {scanData.one_hour_fuel !== undefined && scanData.one_hour_fuel !== null && (
+                <div className="results-row">
+                  <span className="results-label">1-Hour Fuel:</span>
+                  <span className="results-value">{scanData.one_hour_fuel.toFixed(3)} tons/acre</span>
+                </div>
+              )}
+              
+              {scanData.ten_hour_fuel !== undefined && scanData.ten_hour_fuel !== null && (
+                <div className="results-row">
+                  <span className="results-label">10-Hour Fuel:</span>
+                  <span className="results-value">{scanData.ten_hour_fuel.toFixed(3)} tons/acre</span>
+                </div>
+              )}
+              
+              {scanData.hundred_hour_fuel !== undefined && scanData.hundred_hour_fuel !== null && (
+                <div className="results-row">
+                  <span className="results-label">100-Hour Fuel:</span>
+                  <span className="results-value">{scanData.hundred_hour_fuel.toFixed(3)} tons/acre</span>
+                </div>
+              )}
+              
+              {/* Pine Cone Count */}
+              {scanData.pine_cone_count !== undefined && scanData.pine_cone_count !== null && (
+                <div className="results-row">
+                  <span className="results-label">Pine Cone Count:</span>
+                  <span className="results-value">{scanData.pine_cone_count}</span>
+                </div>
+              )}
+              
+              {/* Legacy Fields (if new data not available) */}
+              {!scanData.fuel_load && scanData.fuelLoad && (
+                <div className="results-row">
+                  <span className="results-label">Estimated Fuel Load:</span>
+                  <span className={`results-value fuel-${scanData.fuelLoad.toLowerCase()}`}>
+                    {scanData.fuelLoad}
+                  </span>
+                </div>
+              )}
+              
+              {scanData.fuelDensity && (
+                <div className="results-row">
+                  <span className="results-label">Fuel Density Index:</span>
+                  <span className="results-value">{scanData.fuelDensity}</span>
+                </div>
+              )}
+              
+              {scanData.biomass && (
+                <div className="results-row">
+                  <span className="results-label">Estimated Biomass:</span>
+                  <span className="results-value">{scanData.biomass} kg / m²</span>
+                </div>
+              )}
+              
+              {/* No Data Message */}
+              {!scanData.fuel_load && !scanData.fuelLoad && (
+                <div className="results-row">
+                  <span className="results-value" style={{ color: '#666', fontStyle: 'italic' }}>
+                    No fuel estimation data available
+                  </span>
+                </div>
+              )}
             </div>
           </section>
 
