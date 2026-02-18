@@ -88,6 +88,8 @@ class ScanListItem(BaseModel):
     completed_at: Optional[datetime] = None
     avg_air_temp: Optional[float] = None
     avg_humidity: Optional[float] = None
+    avg_plant_temp: Optional[float] = None  # ✅ 添加
+    fuel_load: Optional[float] = None        # ✅ 添加
     
     class Config:
         from_attributes = True

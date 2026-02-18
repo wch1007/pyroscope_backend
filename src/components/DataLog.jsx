@@ -102,8 +102,8 @@ function DataLog({ logs }) {
                 <th>Zone</th>
                 <th>Avg Air Temp (°C)</th>
                 <th>Avg Humidity (%)</th>
-                <th>Avg Plant Temp</th>
-                <th>Fuel Load</th>
+                <th>Avg Ground Temp (°C)</th>
+                <th>Total Fuel Load (tons/acre)</th>
               </tr>
             </thead>
             <tbody>
@@ -114,11 +114,9 @@ function DataLog({ logs }) {
                   <td>{log.zone}</td>
                   <td>{log.avgAirTemp} °C</td>
                   <td>{log.avgHumidity} %</td>
-                  <td>{log.avgPlantTemp}</td>
+                  <td>{log.avgPlantTemp} °C</td>
                   <td>
-                    <span className={`fuel-badge ${getFuelLoadClass(log.fuelLoad)}`}>
-                      {log.fuelLoad}
-                    </span>
+                    {(log.fuelLoad !== null && log.fuelLoad !== undefined) ? log.fuelLoad.toFixed(3) : '-'}
                   </td>
                 </tr>
               ))}

@@ -133,9 +133,30 @@
 }
 
 .data-log-content.show {
-  max-height: 250px;
+  max-height: 400px;
   padding: 16px 24px;
+  overflow-y: auto;
   overflow-x: auto;
+}
+
+/* Scrollbar styling for data log */
+.data-log-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.data-log-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.data-log-content::-webkit-scrollbar-thumb {
+  background: var(--primary-green);
+  border-radius: 4px;
+}
+
+.data-log-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-green-light);
 }
 
 .data-log-content.hide {

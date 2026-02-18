@@ -1,4 +1,5 @@
-import { Edit2, MapPin, Settings, Activity, Thermometer, History, Target, Pause, Play, Square } from 'lucide-react'
+import { useState } from 'react'
+import { Edit2, MapPin, Settings, Activity, Thermometer, History, Target, Pause, Play, Square, RefreshCw } from 'lucide-react'
 import './Sidebar.css'
 
 function Sidebar({
@@ -16,13 +17,58 @@ function Sidebar({
   onStartScan,
   onPauseScan,
   onResumeScan,
-  onStopScan
+  onStopScan,
+  onUpdateBoundary
 }) {
+  const [updatingLocation, setUpdatingLocation] = useState(false)
+  
   const handleZoneNameEdit = () => {
     const newName = prompt('Enter new zone name:', locationData.zoneName)
     if (newName) {
       setLocationData(prev => ({ ...prev, zoneName: newName }))
     }
+  }
+  
+  const handleRefreshLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+    
+    setUpdatingLocation(true)
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newLat = position.coords.latitude
+        const newLng = position.coords.longitude
+        const accuracy = position.coords.accuracy
+        
+        // Update location data
+        setLocationData(prev => ({
+          ...prev,
+          latitude: newLat,
+          longitude: newLng,
+          gpsAccuracy: accuracy
+        }))
+        
+        // Update boundary and scan target
+        if (onUpdateBoundary) {
+          onUpdateBoundary(newLat, newLng)
+        }
+        
+        setUpdatingLocation(false)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert(`Failed to get location: ${error.message}`)
+        setUpdatingLocation(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
   }
 
   return (
@@ -58,6 +104,17 @@ function Sidebar({
             <span className="info-label">GPS Accuracy:</span>
             <span className="info-value">±{locationData.gpsAccuracy} m</span>
           </div>
+          
+          {/* Refresh Location Button */}
+          <button 
+            className={`refresh-location-btn ${updatingLocation ? 'loading' : ''}`}
+            onClick={handleRefreshLocation}
+            disabled={updatingLocation || isScanning}
+            title="Update current location and boundary"
+          >
+            <RefreshCw size={14} className={updatingLocation ? 'spinning' : ''} />
+            <span>{updatingLocation ? 'Updating...' : 'Refresh Location'}</span>
+          </button>
           
           {/* Designated Scan Location */}
           {scanTarget && (

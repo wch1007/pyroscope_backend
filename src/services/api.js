@@ -108,6 +108,11 @@ class ApiClient {
       body: JSON.stringify(statusData)
     });
   }
+
+  // Heatmap Data
+  async getHeatmapData(scanId) {
+    return this.request(`/scans/${scanId}/heatmap-data`);
+  }
 }
 
 // Export singleton instance

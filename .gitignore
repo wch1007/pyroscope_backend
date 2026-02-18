@@ -7,10 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and build
 node_modules
 dist
 dist-ssr
 *.local
+.cache
+.parcel-cache
+*.tsbuildinfo
+
+# Environment and secrets (do not commit)
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +34,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test and coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Local image storage (skip from repo)
+top down photos/

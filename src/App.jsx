@@ -107,12 +107,12 @@ function App() {
             avgAirTemp: scan.avg_air_temp || 0,
             avgHumidity: scan.avg_humidity || 0,
             avgPlantTemp: scan.avg_plant_temp || 0,
-            fuelLoad: scan.fuel_load || 'Unknown'
+            fuelLoad: (scan.fuel_load !== null && scan.fuel_load !== undefined) ? parseFloat(scan.fuel_load) : null
           }))
           setScanLogs(logs)
           
-          // Update scan history for sidebar
-          const history = response.scans.slice(0, 5).map(scan => ({
+          // Update scan history for sidebar - show all scans
+          const history = response.scans.map(scan => ({
             id: scan.id,
             zone: `Area ${scan.zone_id}`,  // 使用 zone_id 生成显示名称
             date: scan.completed_at ? new Date(scan.completed_at).toLocaleDateString('en-GB').replace(/\//g, '.') : 'N/A',
@@ -356,6 +356,12 @@ function App() {
     setRobotStatus(prev => ({ ...prev, operatingState: 'Idle' }))
   }
 
+  // Handle boundary update when location is refreshed
+  const handleUpdateBoundary = (newLat, newLng) => {
+    // Update scan target to new location
+    setScanTarget({ lat: newLat, lng: newLng })
+  }
+
   const handleScanTargetChange = (newTarget) => {
     setScanTarget(newTarget)
   }
@@ -375,6 +381,7 @@ function App() {
       if (scanDetail) {
         // Transform API response to scan data format
         const detailedScanData = {
+          id: scanDetail.id,  // Add scan ID for heatmap
           zoneId: scanDetail.zone_id || 'Unknown',
           location: `Area ${scanDetail.zone_id}`,
           areaSize: scanDetail.scan_area || '50 m × 50 m',
@@ -384,7 +391,12 @@ function App() {
           avgPlantTemp: scanDetail.avg_plant_temp || 0,
           avgAirTemp: scanDetail.avg_air_temp || 0,
           tempDiff: scanDetail.temp_diff || 0,
-          fuelLoad: scanDetail.fuel_load || 'Unknown',
+          fuel_load: scanDetail.fuel_load,  // Use new field name
+          one_hour_fuel: scanDetail.one_hour_fuel,
+          ten_hour_fuel: scanDetail.ten_hour_fuel,
+          hundred_hour_fuel: scanDetail.hundred_hour_fuel,
+          pine_cone_count: scanDetail.pine_cone_count,
+          fuelLoad: scanDetail.fuel_load || 'Unknown',  // Keep legacy for display
           fuelDensity: scanDetail.fuel_density || 0,
           biomass: scanDetail.biomass || 0,
           recommendations: [
@@ -420,23 +432,24 @@ function App() {
 
   return (
     <div className="dashboard">
-      <Sidebar
-        locationData={locationData}
-        setLocationData={setLocationData}
-        scanConfig={scanConfig}
-        scanTarget={scanTarget}
-        robotStatus={robotStatus}
-        environmentalData={environmentalData}
-        scanHistory={scanHistory}
-        isScanning={isScanning}
-        isPaused={isPaused}
-        scanProgress={scanProgress}
-        scanPhase={scanPhase}
-        onStartScan={handleStartScan}
-        onPauseScan={handlePauseScan}
-        onResumeScan={handleResumeScan}
-        onStopScan={handleStopScan}
-      />
+        <Sidebar
+          locationData={locationData}
+          setLocationData={setLocationData}
+          scanConfig={scanConfig}
+          scanTarget={scanTarget}
+          robotStatus={robotStatus}
+          environmentalData={environmentalData}
+          scanHistory={scanHistory}
+          isScanning={isScanning}
+          isPaused={isPaused}
+          scanProgress={scanProgress}
+          scanPhase={scanPhase}
+          onStartScan={handleStartScan}
+          onPauseScan={handlePauseScan}
+          onResumeScan={handleResumeScan}
+          onStopScan={handleStopScan}
+          onUpdateBoundary={handleUpdateBoundary}
+        />
       <main className="main-content">
         <MapView
           center={[locationData.latitude, locationData.longitude]}
